@@ -24,7 +24,7 @@ class DB_connection:
                        is_active BOOLEAN DEFAULT TRUE,
                        completed_mission INT DEFAULT 0,
                        failed_mission INT DEFAULT 0,
-                       agent ENUM ('Junior', 'Senior', 'Commander'))""")
+                       agent_renk ENUM ('Junior', 'Senior', 'Commander'))""")
         self.connct.commit()
 
 
@@ -45,10 +45,11 @@ class DB_connection:
     def get_connection(self):
         if not self.connct.is_connected():
             self.connct = self.initial_connection()
+            self.create_database()
         return self.connct
         
 
-if __name__ == "__main__":
-    db = DB_connection()
-    db.create_database()
-    db.create_tabels()
+
+db = DB_connection()
+db.create_database()
+db.create_tabels()

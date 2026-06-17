@@ -1,12 +1,12 @@
 from db_connection import db
-
+from config import Creat_agents, Update_agents
 
 
 class AgentDB:
     def __init__(self):
         self.connction = db.get_connection()
 
-    def create_agent(self, data:dict):
+    def create_agent(self, data:Creat_agents):
         set_a = [key for key in data.keys()]
         set_b = " ,".join(set_a)
 
@@ -42,7 +42,7 @@ class AgentDB:
         else:
             return None
         
-    def update_agent(self, id, data: dict):
+    def update_agent(self, id, data: Update_agents):
         set_a = [f"{key}=%s" for key in data.keys()]
         set_b = ", ".join(set_a)
         
