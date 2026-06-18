@@ -19,5 +19,17 @@ class Create_mission(BaseModel):
     importance:int = Field(ge=1, le=10)
 
 
+def risk_level_calculation(data: dict):
+        risk = data['difficulty'] * 2 + data['importance']
+        if risk < 10:
+            return 'LOW'
+        elif risk < 17:
+            return "MEDIUM"
+        elif risk < 25:
+            return "HIGH"
+        else:
+            return "CRITICAL"
+
+
 
 

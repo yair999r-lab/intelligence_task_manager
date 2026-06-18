@@ -1,23 +1,21 @@
-from db_connection import db
-from config import Create_mission
-from agent_db import AgentDB
+from database.db_connection import db
+from database.agent_db import AgentDB
+from database.config import risk_level_calculation
 
-class missionDB:
+class MissionDB:
     def __init__(self):
         self.connction = db.get_connection()
 
-    def create_mission(self, data:Create_mission):
-        risk = self.risk_level_calculation(data)
-        if not risk:
-            return "importance and difficulty must by bytwin 1-10"
+    def create_mission(self, data:dict):
+        risk = risk_level_calculation(data)
+        
         data['risk_level'] = risk
         set_a = [key for key in data.keys()]
+        
         set_b = " ,".join(set_a)
-
         val = tuple(data.values())
-
         cursor = self.connction.cursor()
-
+        
         sql = f"INSERT INTO missions({set_b}) VALUES (%s, %s, %s, %s, %s, %s)"
         cursor.execute(sql, val)
 
@@ -29,21 +27,9 @@ class missionDB:
             agent = cursor.fetchone()
             cursor.close()
             return agent
-        return "feild to add mission!"
+        return None
     
-    def risk_level_calculation(self, data:dict):
-        if 0 > data["difficulty"] or data["difficulty"] > 10 or 0 > data["importance"] or data["importance"] > 10:
-            return None
-        risk = data['difficulty'] * 2 + data['importance']
-        if risk < 10:
-            return 'LOW'
-        elif risk < 17:
-            return "MEDIUM"
-        elif risk < 25:
-            return "HIGH"
-        else:
-            return "CRITICAL"
-        
+
     def get_all_mission(self):
         cursor = self.connction.cursor()
         cursor.execute("SELECT * FROM missions")
@@ -54,26 +40,18 @@ class missionDB:
     def get_mission_by_id(self, id:int):
         cursor = self.connction.cursor()
         cursor.execute("SELECT * FROM missions WHERE id=%s", (id,))
-        agent = cursor.fetchall()
+        mission = cursor.fetchone()
         cursor.close()
-        if agent:
-            return agent
+        print(mission)
+        if mission:
+            return mission
         else:
             return None
         
     def assign_mission(self, id_m:int, id_a:int):
-        agent = AgentDB().get_agent_by_id(id=id_a)
-        if not agent:
-            return f"not agent by {id} id"
-        mission = self.get_mission_by_id(id=id_m)
-        if not mission:
-            return f"no mission by {id} id"
-        
-        if mission['risk_level'] == "CRITICAL":
-            if agent['agent_renk'] != 'Commander':
-                return "You cannot assign a critical mission to an agent below the rank of Commander."
+    
         cursor = self.connction.cursor()
-        cursor.execute("UPDATE missions SET status=ASSIGNED, assigned_agent_it=%s", (id,))
+        cursor.execute("UPDATE missions SET status='ASSIGNED', assigned_agent_it=%s WHERE id=%s", (id_a, id_m))
         self.connction.commit()
 
         change = cursor.rowcount > 0
@@ -83,17 +61,13 @@ class missionDB:
         if change:
             return "mission assigned"
         else:
-            return "mission ant assigned"
+            return None
         
     def update_mission_status(self, id_m:int, status:str):
-        if status not in ["IN_PROGRESS", "COMPLETED", "FAILED", "CANCELLED"]:
-            return "status unknown"
-        mission = self.get_mission_by_id(id_m)
-        if not mission:
-            return f"no mission by {id} id"
+    
         cursor = self.connction.cursor()
 
-        cursor.execute("UPDATE mission SET status=%s WHERE id=%s",(status,id_m))
+        cursor.execute("UPDATE missions SET status=%s WHERE id=%s",(status,id_m))
 
         self.connction.commit()
 
@@ -102,12 +76,12 @@ class missionDB:
         if change:
             return "status update"
         else:
-            return "status not update"
+            return None
 
-    def get_mission_by_id(self, id):
         
-        
-
-
-m = missionDB()
-print(m.create_mission({"title" : "aaa", "description": "bbbb", "location": "ccc", "difficulty": 111, "importance": 11}))
+    def count_open_mission(self, id:int):
+        cursor = self.connction.cursor()
+        cursor.execute("SELECT COUNT(*) FROM missions WHERE id=%s", (id,))
+        countr = cursor.fetchone()
+        cursor.close()
+        return countr

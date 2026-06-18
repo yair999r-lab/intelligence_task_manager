@@ -48,8 +48,4 @@ class DB_connection:
             self.create_database()
         return self.connct
         
-
-
 db = DB_connection()
-db.create_database()
-db.create_tabels()

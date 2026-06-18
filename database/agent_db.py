@@ -1,8 +1,9 @@
-from db_connection import db
-
+from database.db_connection import db
+ 
 class AgentDB:
     def __init__(self):
         self.connction = db.get_connection()
+        
 
     def create_agent(self, data:dict):
         set_a = [key for key in data.keys()]
@@ -40,7 +41,7 @@ class AgentDB:
         else:
             return None
         
-    def update_agent(self, id, data: dict):
+    def update_agent(self, id:int, data: dict):
         set_a = [f"{key}=%s" for key in data.keys()]
         set_b = ", ".join(set_a)
         
@@ -79,11 +80,15 @@ class AgentDB:
         self.connction.commit()
 
         change = cursor.rowcount > 0
-        cursor.close()
+        
         if change:
-            return f"add 1 completed mission to agent {id}"
+            cursor.execute("SELECT completed_mission FROM agents WHERE id=%s",(id,))
+            completed = cursor.fetchone()
+            cursor.close()
+            return f"agent {id} heve {completed} completed mission"
         else:
-            return f"no agent by {id} id"
+            cursor.close()
+            return None
         
     def incrment_failed(self, id):
         cursor = self.connction.cursor()
@@ -94,9 +99,13 @@ class AgentDB:
         change = cursor.rowcount > 0
         cursor.close()
         if change:
-            return f"add 1 failed mission to agent {id}"
+            cursor.execute("SELECT failed_mission FROM agents WHERE id=%s",(id,))
+            failed = cursor.fetchone()
+            cursor.close()
+            return f"agent {id} heve {failed} failed mission"
         else:
-            return f"no agent by {id} id"
+            cursor.close()
+            return None
         
     def get_agent_performance(self, id):
         cursor = self.connction.cursor()
@@ -111,8 +120,10 @@ class AgentDB:
         performance['mission complit'] = data[0]
         performance['mission failed'] = data[1]
         performance['total'] = data[0] + data[1]
-        performance['success_rate'] = data[0] * 100 / performance['total'] 
+        performance["success_rate"] = 0
+        if performance["total"] > 0:
 
+            performance['success_rate'] = data[0] * 100 / performance['total'] 
         return performance
     
     def count_active_agents(self):

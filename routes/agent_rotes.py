@@ -6,15 +6,18 @@ ca = AgentDB()
 
 route = APIRouter(prefix='/agents', tags=['agent'])
 
-@route.post(status_code=status.HTTP_201_CREATED)
+@route.post('/',status_code=status.HTTP_201_CREATED)
 def add_agebt(data:Creat_agents):
-    agent = ca.create_agent(data=data.model_dump())
+    try:
+        agent = ca.create_agent(data=data.model_dump())
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="renk not legal")
     if agent:
         return agent
     else:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-@route.get(status_code=status.HTTP_200_OK)
+@route.get('/', status_code=status.HTTP_200_OK)
 def show_all_agent():
     return ca.get_all_agents()
 
@@ -24,17 +27,21 @@ def show_agent(id:int):
     if agent:
         return agent
     else:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="agent not exists")
     
 @route.put('/{id}', status_code=status.HTTP_200_OK)
 def update_agents(id:int, data:Update_agents):
     up_data = data.model_dump(exclude_unset=True)
-    update = ca.update_agent(id=id, data=up_data)
+    print(up_data)
+    try:
+        update = ca.update_agent(id=id, data=up_data)
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
     if update:
         return update
     else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="no data change")
     
 @route.put('/{id}/deactivate', status_code=status.HTTP_200_OK)
 def agent_deactivate(id:int):
@@ -43,7 +50,7 @@ def agent_deactivate(id:int):
     if change:
         return change
     else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="no data change")
 
 @route.get('/{id}/performance', status_code=status.HTTP_200_OK)
 def show_agent_performance(id:int):
