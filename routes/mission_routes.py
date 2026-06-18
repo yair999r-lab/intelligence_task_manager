@@ -42,17 +42,14 @@ def assing_mission(id:int, agent_id:int):
     mission = cm.get_mission_by_id(id=id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mission not exists")
-    if mission[6] != "NEW":
+    if mission['status'] != "NEW":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission Already active")
-    if agent[3] == False:
+    if agent['is_active'] == False:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="agent not active")
-    open_mission = cm.count_open_mission(id=id)
-    l = list(open_mission)
-    i = int(l[0])
-    print(i)
-    if i > 2:
+    open_mission = cm.get_open_missions_by_agent(id=agent_id)
+    if open_mission > 2:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="the agent are already 3 open tasks.")
-    if agent[6] != "Commander" and mission[7] == "CRITICAL":
+    if agent['agent_renk'] != "Commander" and mission['risk_level'] == "CRITICAL":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The agent's rank does not match the mission's risk level.")
     assing = cm.assign_mission(id_a=agent_id, id_m=id)
 
@@ -61,13 +58,12 @@ def assing_mission(id:int, agent_id:int):
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission not assign")
     
-
 @route.put('/{id}/start')
 def start_mission(id:int):
     mission = cm.get_mission_by_id(id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mission not exists")
-    if mission[6] != "ASSIGNED":
+    if mission['status'] != "ASSIGNED":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission status Already active/finished")
     new_stt = cm.update_mission_status(id_m=id, status="PROGRESS_IN")
     if new_stt:
@@ -80,7 +76,7 @@ def complet_mission(id:int):
     mission = cm.get_mission_by_id(id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mission not exists")
-    if mission[6] != "PROGRESS_IN":
+    if mission['status'] != "PROGRESS_IN":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission status Already active/finished")
     new_stt = cm.update_mission_status(id_m=id, status="COMPLETED")
     if new_stt:
@@ -96,7 +92,7 @@ def failed_mission(id:int):
     mission = cm.get_mission_by_id(id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mission not exists")
-    if mission[6] != "PROGRESS_IN":
+    if mission['status'] != "PROGRESS_IN":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission status Already active/finished")
     new_stt = cm.update_mission_status(id_m=id, status="FAILED")
     if new_stt:
@@ -112,7 +108,7 @@ def cancel_mission(id:int):
     mission = cm.get_mission_by_id(id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="mission not exists")
-    if mission[6] not in ["NEW", "ASSIGEND" ] :
+    if mission['status'] not in ["NEW", "ASSIGEND"] :
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="mission status Already active/finished")
     new_stt = cm.update_mission_status(id_m=id, status="CANCELLED")
     if new_stt:
