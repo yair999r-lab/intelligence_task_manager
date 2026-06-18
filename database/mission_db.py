@@ -104,7 +104,8 @@ class missionDB:
         else:
             return "status not update"
 
-
+    def get_mission_by_id(self, id):
+        
         
 
 

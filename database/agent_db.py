@@ -1,12 +1,10 @@
 from db_connection import db
-from config import Creat_agents, Update_agents
-
 
 class AgentDB:
     def __init__(self):
         self.connction = db.get_connection()
 
-    def create_agent(self, data:Creat_agents):
+    def create_agent(self, data:dict):
         set_a = [key for key in data.keys()]
         set_b = " ,".join(set_a)
 
@@ -24,7 +22,7 @@ class AgentDB:
             agent = cursor.fetchone()
             cursor.close()
             return agent
-        return "feild to add agent!"
+        return None
 
     def get_all_agents(self):
         curor = self.connction.cursor()
@@ -42,7 +40,7 @@ class AgentDB:
         else:
             return None
         
-    def update_agent(self, id, data: Update_agents):
+    def update_agent(self, id, data: dict):
         set_a = [f"{key}=%s" for key in data.keys()]
         set_b = ", ".join(set_a)
         
@@ -61,7 +59,7 @@ class AgentDB:
         if change:
             return f"agent {id} update"
         else:
-            return f"no agent by id {id} or not change commit"
+            return None
 
     def deactivate_agent(self,id):
         cursor = self.connction.cursor()
@@ -72,7 +70,7 @@ class AgentDB:
         if change:
             return f"agent {id} deactivate"
         else:
-            return f"not agent active by {id} id"
+            return None
         
     def incrment_completed(self, id):
         cursor = self.connction.cursor()
@@ -107,7 +105,7 @@ class AgentDB:
         data = list(cursor.fetchone())
         cursor.close()
         if not data:
-            return f"no agent by {id} id"
+            return None
 
         performance = {}
         performance['mission complit'] = data[0]

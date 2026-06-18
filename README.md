@@ -6,6 +6,8 @@ The system can create agents and tasks and assign tasks to appropriate agents - 
 
 The system creates a connection to the database where it stores the data and is responsible for retrieving and inserting the data.
 
+The system is powered by a fastapi server - the list of "addresses" is attached below.
+
 # File structure
 
 intelligence-task-manager/
@@ -200,4 +202,58 @@ Returns: Agent with the most completed missions
 docker run -d --name intelligence-mysql -e MYSQL_ROOT_PASSWORD=1234 \
   -e MYSQL_DATABASE=Intelligence_db -p 3306:3306 mysql:8.0
 
+# Endpoints
 
+## missions endpoints
+
+POST /mission - create mission
+GET /mission - show all mission
+GET /mission/{id} - show mission by id 
+PUT /mission/{id}/assige/{agent_id} - assign mission to agent
+PUT /missiion/{id}/start - start mission
+PUT /mission/{id}/complete - complete mission 
+PUT /mission/{id}/fail - mission falid
+PUT /mission//{id}/cancel - mission canael
+
+## agents endpoints
+
+POST /agents - create agent
+GET /agents - show all agents
+GET /agents/{id} - show agent by id
+PUT /agents/{id} - update agent
+PUT /agents/{id}/deactivate - deactivate agent
+PUT /agents/{id}/perpormance - show agent perpormance
+
+## reports endpoints
+
+GET /reports/summaty - General report
+GET /reports/mission-by-status - Showing how many hits each status has 
+GET /reports/top-agent - show top agent-Most completed tasks
+
+
+# System flow
+
+### Create an agent/task
+User submits data to create a new task agent
+The system verifies that the input is valid and meets the system requirements.
+If correct - information about the new agent/task is returned and saved in our database.
+If it is not correct, the system returns an error message to the customer and to us as well.
+
+### Assign a task to an agent.
+
+The client sends an ID of the requested task and the ID of the agent it wants to associate with it.
+
+The system verifies that the agent exists. That the task exists. And that it can be assigned.
+
+If so, the system updates our database that the task has been sent and the customer receives a success message.
+
+If it is not possible to assign - the task is already assigned or has been canceled. Either the agent is inactive, or he does not have a level for importance, or he already has many tasks - the system does not update and returns a clear message to the customer.
+
+The system is started by the main file - the command is attached below - and a connection to the database is created as long as our server is online and the connection is automatically closed when the server is shut down.
+
+We have an app.log file saved in our system, which lists all actions - successes, errors, etc. - detailed with times.
+
+# Running the system
+
+The run command is: uvicorn main:app
+Run the command in the terminal in the main folder

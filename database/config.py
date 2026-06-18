@@ -7,16 +7,16 @@ class Creat_agents(BaseModel):
     agent_renk:Literal['Junior', 'Senior', 'Commander']
 
 class Update_agents(BaseModel):
-    name:Optional[str] 
-    specialty:Optional[str]
-    agent_renk:Optional[str]
+    name:Optional[str] = Field(default=None, max_length=30)
+    specialty:Optional[str] = Field(default=None, max_length=50)
+    agent_renk:Optional[str] = Literal['Junior', 'Senior', 'Commander']
 
 class Create_mission(BaseModel):
     title:str
     description:str
     location:str
-    difficulty:int 
-    importance:int 
+    difficulty:int = Field(ge=1, le=10)
+    importance:int = Field(ge=1, le=10)
 
 
 
