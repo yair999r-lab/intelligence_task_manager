@@ -26,14 +26,14 @@ class AgentDB:
         return None
 
     def get_all_agents(self):
-        curor = self.connction.cursor()
+        curor = self.connction.cursor(dictionary=True)
         curor.execute("SELECT * FROM agents")
         agents = curor.fetchall()
         curor.close()
         return agents
     
     def get_agent_by_id(self,id):
-        cursor = self.connction.cursor()
+        cursor = self.connction.cursor(dictionary=True)
         cursor.execute("SELECT * FROM agents WHERE id=%s", (id,))
         agent = cursor.fetchone()
         if agent:
@@ -91,7 +91,7 @@ class AgentDB:
             return None
         
     def incrment_failed(self, id):
-        cursor = self.connction.cursor()
+        cursor = self.connction.cursor(dictionary=True)
 
         cursor.execute("UPDATE agents SET failed_mission=failed_mission + 1 WHERE id=%s", (id,))
         self.connction.commit()
@@ -111,7 +111,7 @@ class AgentDB:
         cursor = self.connction.cursor()
         cursor.execute("SELECT completed_mission, failed_mission FROM agents WHERE id=%s",(id,))
 
-        data = list(cursor.fetchone())
+        data = cursor.fetchone()
         cursor.close()
         if not data:
             return None
@@ -127,15 +127,12 @@ class AgentDB:
         return performance
     
     def count_active_agents(self):
-        cursor = self.connction.cursor()
+        cursor = self.connction.cursor(dictionary=True)
 
         cursor.execute("SELECT COUNT(*) FROM agents WHERE is_active=TRUE")
-        agents = list(cursor.fetchone())
+        agents = cursor.fetchall()
         cursor.close()
 
-        if agents:
-            return int(agents[0])
-        else:
-            return "no active agents"    
+        return agents
 
 
