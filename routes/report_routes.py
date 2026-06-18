@@ -5,7 +5,7 @@ from database.mission_db import MissionDB
 
 route = APIRouter(prefix='/reports', tags=["summry"])
 
-@route.get('/get_top_agent', status_code=status.HTTP_200_OK)
+@route.get('/top-agent', status_code=status.HTTP_200_OK)
 def all_data():
     data = {"active_agents_count": 0,
     "total_missions": 0,
